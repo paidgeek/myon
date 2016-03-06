@@ -1,5 +1,6 @@
 myon
 =========
+[![Code Climate](https://codeclimate.com/github/paidgeek/myon/badges/gpa.svg)](https://codeclimate.com/github/paidgeek/myon)
 
 Fetching MySQL schema for validation purposes.
 
