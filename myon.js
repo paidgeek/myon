@@ -10,6 +10,7 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
+var tableNames = [];
 var sql = "";
 
 connection.query("SHOW TABLES", function(err, tables) {
@@ -17,27 +18,54 @@ connection.query("SHOW TABLES", function(err, tables) {
       console.log(err.stack);
    }
 
-   for (var i = 0; i < tables.length - 48; i++) {
+   for (var i = 0; i < tables.length - 47; i++) {
       var tableName = tables[i]["Tables_in_food"];
 
+      tableNames.push(tableName);
       sql += "SHOW COLUMNS FROM `" + tableName + "`;\n";
    }
 }).on("end", function() {
-   console.log(sql);
-
-   connection.query(sql, function(err, results) {
+   connection.query(sql, function(err, rows, fields) {
       if (err) {
          console.log(err.stack);
       }
 
-      for (var i = 0; i < results.length; i++) {
-         var result = results[i];
+      var myon = {};
 
-         for (var j = 0; j < result.length; j++) {
-            var column = result[j];
+      if (tableNames.length == 1) {
+         var name = tableNames[0];
+         myon[name] = {};
 
-            console.log(column);
+         for (var i in rows) {
+            var field = rows[i].Field;
+
+            myon[name][field] = {
+               type: rows[i].Type,
+               notNull: rows[i].Null == "NO",
+               key: rows[i].Key,
+               defaultValue: rows[i].Default,
+               extra: rows[i].Extra
+            };
+         }
+      } else if (tableNames.length > 1) {
+         for (var i in rows) {
+            var name = tableNames[i];
+            myon[name] = {};
+
+            console.log(rows[i]);
+
+            myon[name]["field"] = rows[i].Field;
+            myon[name]["type"] = rows[i].Type;
+            myon[name]["notNull"] = rows[i].Null == "NO";
+            myon[name]["key"] = rows[i].Key;
+            myon[name]["default"] = rows[i].Default;
+            myon[name]["extra"] = rows[i].Extra;
          }
       }
+
+      console.log(myon["fc_celiac_members"]["CODE"]);
+
+      console.log("-- MYON --");
+      console.log(myon);
    });
 });
