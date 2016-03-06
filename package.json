@@ -1,0 +1,28 @@
+{
+  "name": "myon",
+  "version": "1.0.0",
+  "description": "Get mysql database schema",
+  "main": "myon.js",
+  "dependencies": {
+    "mysql": "^2.10.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paidgeek/myon.git"
+  },
+  "keywords": [
+    "mysql",
+    "schema",
+    "js"
+  ],
+  "author": "Tin Rabzelj <tin.rabzelj@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paidgeek/myon/issues"
+  },
+  "homepage": "https://github.com/paidgeek/myon#readme"
+}

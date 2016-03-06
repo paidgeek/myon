@@ -1,71 +1,75 @@
 var mysql = require('mysql');
 
-var connection = mysql.createConnection({
-   host: '33.33.33.1',
-   user: 'root',
-   password: 'root',
-   database: 'food',
-   multipleStatements: true
-});
+var getDatabaseSchema = function(info, callback) {
+   var connection = mysql.createConnection({
+      host: info.host,
+      user: info.user,
+      password: info.password,
+      database: info.database,
+      multipleStatements: true
+   });
 
-connection.connect();
+   connection.connect();
 
-var tableNames = [];
-var sql = "";
+   var tableNames = [];
+   var sql = "";
 
-connection.query("SHOW TABLES", function(err, tables) {
-   if (err) {
-      console.log(err.stack);
-   }
-
-   for (var i = 0; i < tables.length - 47; i++) {
-      var tableName = tables[i]["Tables_in_food"];
-
-      tableNames.push(tableName);
-      sql += "SHOW COLUMNS FROM `" + tableName + "`;\n";
-   }
-}).on("end", function() {
-   connection.query(sql, function(err, rows, fields) {
+   connection.query("SHOW TABLES", function(err, tables) {
       if (err) {
          console.log(err.stack);
       }
 
-      var myon = {};
+      for (var i = 0; i < tables.length; i++) {
+         var tableName = tables[i]["Tables_in_food"];
 
-      if (tableNames.length == 1) {
-         var name = tableNames[0];
-         myon[name] = {};
-
-         for (var i in rows) {
-            var field = rows[i].Field;
-
-            myon[name][field] = {
-               type: rows[i].Type,
-               notNull: rows[i].Null == "NO",
-               key: rows[i].Key,
-               defaultValue: rows[i].Default,
-               extra: rows[i].Extra
-            };
+         tableNames.push(tableName);
+         sql += "SHOW COLUMNS FROM `" + tableName + "`;\n";
+      }
+   }).on("end", function() {
+      connection.query(sql, function(err, rows, fields) {
+         if (err) {
+            console.log(err.stack);
          }
-      } else if (tableNames.length > 1) {
-         for (var i in rows) {
-            var name = tableNames[i];
+
+         var myon = {};
+
+         if (tableNames.length == 1) {
+            var name = tableNames[0];
             myon[name] = {};
 
-            console.log(rows[i]);
+            for (var i in rows) {
+               var field = rows[i].Field;
 
-            myon[name]["field"] = rows[i].Field;
-            myon[name]["type"] = rows[i].Type;
-            myon[name]["notNull"] = rows[i].Null == "NO";
-            myon[name]["key"] = rows[i].Key;
-            myon[name]["default"] = rows[i].Default;
-            myon[name]["extra"] = rows[i].Extra;
+               myon[name][field] = {
+                  type: rows[i].Type,
+                  notNull: rows[i].Null == "NO",
+                  key: rows[i].Key,
+                  defaultValue: rows[i].Default,
+                  extra: rows[i].Extra
+               };
+            }
+         } else if (tableNames.length > 1) {
+            for (var i in rows) {
+               var name = tableNames[i];
+               myon[name] = {};
+
+               for (var j in rows[i]) {
+                  var field = rows[i][j].Field;
+
+                  myon[name][field] = {
+                     type: rows[i][j].Type,
+                     notNull: rows[i][j].Null == "NO",
+                     key: rows[i][j].Key,
+                     defaultValue: rows[i][j].Default,
+                     extra: rows[i][j].Extra
+                  };
+               }
+            }
          }
-      }
 
-      console.log(myon["fc_celiac_members"]["CODE"]);
-
-      console.log("-- MYON --");
-      console.log(myon);
+         callback(myon);
+      });
    });
-});
+};
+
+exports.getDatabaseSchema = getDatabaseSchema;
