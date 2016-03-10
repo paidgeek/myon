@@ -16,19 +16,18 @@ var getDatabaseSchema = function(info, callback) {
 
    connection.query("SHOW TABLES", function(err, tables) {
       if (err) {
-         console.log(err.stack);
+         return console.log(err.stack);
       }
 
       for (var i = 0; i < tables.length; i++) {
-         var tableName = tables[i]["Tables_in_food"];
-
+         var tableName = tables[i][Object.keys(tables[i])[0]];
          tableNames.push(tableName);
          sql += "SHOW COLUMNS FROM `" + tableName + "`;\n";
       }
    }).on("end", function() {
       connection.query(sql, function(err, rows, fields) {
          if (err) {
-            console.log(err.stack);
+            return console.log(err.stack);
          }
 
          var myon = {};
@@ -68,6 +67,7 @@ var getDatabaseSchema = function(info, callback) {
          }
 
          callback(myon);
+         connection.end();
       });
    });
 };
